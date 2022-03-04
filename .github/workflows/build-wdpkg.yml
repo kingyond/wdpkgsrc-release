@@ -97,13 +97,13 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.make_apkg.outputs.pkg }}_${{ steps.make_apkg.outputs.version }}_OS5
-        path: wdpk/*_*_*.bin
+        path: wdpksrc/wdpk/*_*_*.bin
 
     - name: Generate release tag
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "::set-output name=release_tag::$(date +"%Y.%m.%d-%H%M")"
+        echo "::set-output name=release_tag::${{ matrix.platform }} $(date +"%Y.%m.%d-%H%M")"
         touch release.txt
         echo "WD My Cloud PKG"
         echo "::set-output name=status::success"
@@ -116,7 +116,7 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
-        files: wdpk/*
+        files: wdpksrc/wdpk/*
 
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
