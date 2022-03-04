@@ -1,4 +1,4 @@
-name: WDMyCloud_Mirror_GPL_v5.18 firmware
+name: Build WD package
 
 on:
   repository_dispatch:
