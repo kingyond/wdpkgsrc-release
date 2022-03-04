@@ -10,7 +10,7 @@ env:
   SRC_URL: https://github.com/WDCommunity/wdpksrc.git
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
-  PACKAGES: docker entware
+  PACKAGES: "docker entware"
   TZ: Asia/Shanghai
 
 jobs:
