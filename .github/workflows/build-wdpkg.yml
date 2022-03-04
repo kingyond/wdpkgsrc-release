@@ -28,8 +28,8 @@ jobs:
 
     - name: Download Src
       run: |
+        mkdir -p output/bin
         git clone https://github.com/WDCommunity/wdpksrc.git
-        ls
         cd wdpksrc
 
     - name: Build the packages
