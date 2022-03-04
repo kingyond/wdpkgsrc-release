@@ -7,5 +7,6 @@ do
     echo "$element"
     cd $GITHUB_WORKSPACE/wdpksrc/wdpk/$element
     ./build.sh
-    cp $SRC_TAR $GITHUB_WORKSPACE/output/bin/$SRC_TAR
+    cp -f $(find ./ -type f -name "*.bin") $GITHUB_WORKSPACE/output/bin/
+    cp -f $(find ./ -type f -name "*.tar.gz") $GITHUB_WORKSPACE/output/bin/
 done

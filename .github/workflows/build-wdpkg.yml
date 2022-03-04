@@ -10,6 +10,7 @@ env:
   SRC_URL: https://github.com/WDCommunity/wdpksrc.git
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
+  PACKAGES: docker entware
   TZ: Asia/Shanghai
 
 jobs:
@@ -24,40 +25,54 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        mkdir -p output/bin
         sudo -E apt-get -qq install libxml2 openssl
+        pkgs=$PACKAGES
+        echo "Packages: ${pkgs}"
+        echo "PACKAGE=${pkgs}" >> $GITHUB_ENV
 
     - name: Download Src
       run: |
-        mkdir -p output/bin
         git clone https://github.com/WDCommunity/wdpksrc.git
         cd wdpksrc
 
-    - name: Build the packages
+    - name: Make APKG packages for selected platforms
+      id: make_apkg
+      env:
+        PLATFORM: ${{ matrix.platform }}
+        MODEL: ${{ matrix.model }}
       run: |
         cd $GITHUB_WORKSPACE/wdpksrc
-        docker build -t wdpk . 
-        docker run -i -v $(pwd):/wdpksrc wdpk /bin/bash
-        chmod +x $GITHUB_WORKSPACE/scripts/build.sh
-        $GITHUB_WORKSPACE/scripts/build.sh
+        pkg=$(echo ${PACKAGE:-docker} | cut -d' ' -f1)
+        echo ::set-output name=pkg::"$pkg"
+        cd wdpk/${pkg}
+        DATE="$(date +"%m%d%Y")"
+        CWD="$(pwd)"
+        VERSION="$(awk '/Version/{print $NF}' apkg.rc)"
+        echo ::set-output name=version::"${VERSION}"
+        NAME="$(awk '/AddonShowName/{print $NF}' apkg.rc)"
+        echo ::set-output name=name::"${NAME}"
+        DESCRIPTION="$(awk '/Description/{print $NF}' apkg.rc)"
+        echo ::set-output name=description::"${DESCRIPTION}"
+        echo "Building ${pkg} version ${VERSION}"
+        echo "$(ls -l ../..)"
+        RELEASE_DIR="../../packages/${pkg}/OS5"
+        mkdir -p "${RELEASE_DIR}"
+        echo "PLF ${PLATFORM} - $arr - ${PACKAGE}"
+        echo "Build ${pkg} for $MODEL"
+        ../../mksapkg-OS5 -E -s -m ${PLATFORM} > /dev/null
+        mv ../${PLATFORM}*.bin\(* ../${pkg}_${VERSION}_${MODEL}.bin
+        echo "$(ls -l ..)"
 
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
 
-    - name: Upload bin directory
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
       with:
-        name: wdpkg
-        path: output/bin
-
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd output/bin
-        echo "WDPKG=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=status::success"
+        name: ${{ steps.make_apkg.outputs.pkg }}_${{ steps.make_apkg.outputs.version }}_OS5
+        path: wdpk/*_*_*.bin
 
     - name: Generate release tag
       id: tag
@@ -68,7 +83,7 @@ jobs:
         echo "WD My Cloud PKG"
         echo "::set-output name=status::success"
 
-    - name: Upload firmware to release
+    - name: Upload packages to release
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
@@ -76,7 +91,7 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
-        files: ${{ env.WDPKG }}/*
+        files: wdpk/*
 
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
