@@ -103,7 +103,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "::set-output name=release_tag::${{ matrix.platform }} $(date +"%Y.%m.%d-%H%M")"
+        echo "::set-output name=release_tag::${{ matrix.platform }}-$(date +"%Y.%m.%d-%H%M")"
         touch release.txt
         echo "WD My Cloud PKG"
         echo "::set-output name=status::success"
