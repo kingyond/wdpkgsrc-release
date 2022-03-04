@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+
+env:
+  SRC_URL: https://github.com/WDCommunity/wdpksrc.git
+  TZ: Asia/Shanghai
+
+jobs:
+  Publish:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Initialization Environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get -qq libxml2 openssl
