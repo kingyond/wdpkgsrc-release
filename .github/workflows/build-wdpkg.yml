@@ -52,8 +52,6 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        mkdir -p output/bin
-        sudo -E apt-get -qq install libxml2 openssl
         pkgs=$PACKAGES
         echo "Packages: ${pkgs}"
         echo "PACKAGE=${pkgs}" >> $GITHUB_ENV
