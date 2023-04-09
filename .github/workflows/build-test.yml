@@ -3,8 +3,8 @@ name: Test
 on:
   repository_dispatch:
   workflow_dispatch:
-  schedule:
-    - cron: 0 0 * * *
+#  schedule:
+#    - cron: 0 0 * * *
 
 env:
   SRC_URL: https://github.com/WDCommunity/wdpksrc.git
